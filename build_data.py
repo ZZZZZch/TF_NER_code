@@ -53,8 +53,6 @@ def build_data(config):
     # Build and save char vocab
     train = Dataset(train_filepath)
     vocab_chars = get_char_vocab(train)
-    for c in vocab_chars:
-        print(c,end = ', ')
     write_vocab(vocab_chars, config.chars_filename)
 
 
