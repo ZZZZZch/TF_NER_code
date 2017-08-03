@@ -129,8 +129,7 @@ class Dataset(object):
             rows = len(lines)
             for i, line in enumerate(lines):
                 line = line.strip()
-                if (len(line) == 0 or i == rows - 1
-                        or line.startswith("-DOCSTART-")):
+                if (len(line) == 0 or i == rows - 1):
                     if len(words) != 0:
                         niter += 1
                         if self.max_iter is not None and niter > self.max_iter:
@@ -138,7 +137,7 @@ class Dataset(object):
                         yield words, tags
                         words, tags = [], []
                 else:
-                    line_split = re.split(r'[\s\t]+', line)
+                    line_split = re.split(r'[\t\s]+', line)
                     if len(line_split) == 2:
                         word, tag = line_split
                         if self.processing_word is not None:
@@ -187,6 +186,7 @@ def get_char_vocab(dataset):
     Returns:
         a set of all the characters in the dataset
     """
+
     vocab_char = set()
     for words, _ in dataset:
         for word in words:
@@ -240,7 +240,7 @@ def load_vocab(filename):
     """
     try:
         d = dict()
-        with open(filename) as f:
+        with open(filename, 'r', encoding='utf-8') as f:
             for idx, word in enumerate(f):
                 word = word.strip()
                 d[word] = idx
@@ -462,5 +462,6 @@ def get_chunks(seq, tags):
 
     return chunks
 
+
 def clear_data_path(from_path):
-    return os.path.splitext(from_path)[0]+".txt"
+    return os.path.splitext(from_path)[0] + ".txt"
