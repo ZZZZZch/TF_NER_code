@@ -1,9 +1,11 @@
 import numpy as np
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-import tensorflow as tf
 from data_utils import minibatches, pad_sequences, get_chunks
 from general_utils import Progbar, print_sentence
+import os
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+import tensorflow as tf
 
 
 class NERModel(object):
