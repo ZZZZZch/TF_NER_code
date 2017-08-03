@@ -12,7 +12,7 @@ class Config():
         self.logger = get_logger(self.log_path)
 
     # general config
-    output_path = "../results/crf/"
+    output_path = "results/crf/"
     model_output = output_path + "model.weights/"
     log_path = output_path + "log.txt"
 
