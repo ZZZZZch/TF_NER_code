@@ -1,7 +1,7 @@
 from config import Config
 from data_utils import Dataset, get_vocabs, UNK, NUM, \
     get_glove_vocab, write_vocab, load_vocab, get_char_vocab, \
-    export_trimmed_glove_vectors, get_processing_word
+    export_trimmed_glove_vectors, get_processing_word, write_clear_data
 
 
 def build_data(config):
@@ -15,11 +15,23 @@ def build_data(config):
         creates a npz embedding file from trimmed glove vectors
     """
     processing_word = get_processing_word(lowercase=True)
+    processing_word = get_processing_word(lowercase=True)
+
+    # clean data
+    train_filepath, dev_filepath_a = write_clear_data(
+        config.train_filename,
+        build_dev=config.build_dev_from_trainset,
+        dev_ratio=config.dev_ratio)
+    test_filepath, dev_filepath_b = write_clear_data(
+        config.test_filename,
+        build_dev=config.build_dev_from_testset,
+        dev_ratio=config.dev_ratio)
+    dev_filepath = dev_filepath_a or dev_filepath_b
 
     # Generators
-    dev = Dataset(config.dev_filename, processing_word)
-    test = Dataset(config.test_filename, processing_word)
-    train = Dataset(config.train_filename, processing_word)
+    dev = Dataset(dev_filepath, processing_word)
+    test = Dataset(test_filepath, processing_word)
+    train = Dataset(train_filepath, processing_word)
 
     # Build Word and Tag vocab
     vocab_words, vocab_tags = get_vocabs([train, dev, test])

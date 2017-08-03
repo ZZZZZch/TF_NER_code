@@ -7,6 +7,8 @@ UNK = "$UNK$"
 NUM = "$NUM$"
 # NONE = "O"
 NONE = "nonretailrelated"
+DEFAULT = "nonretailrelated"
+
 
 def write_clear_data(from_path, build_dev=False, dev_ratio=0.1):
     """
@@ -18,18 +20,21 @@ def write_clear_data(from_path, build_dev=False, dev_ratio=0.1):
     Returns:
         (sting) path of clear data file
     """
-    from_file = open(from_path, encoding='utf-8')
+    from_file = open(from_path, 'r', encoding='utf-8')
     to_path = os.path.splitext(from_path)[0] + '.txt'
-    to_file = open(to_path, 'a', encoding='utf-8')
-    length = len(from_file.readlines())
-    for idx, line in enumerate(from_file):
-        if build_dev:
-            dev_path = os.path.join(os.path.split(
-                to_path)[0], 'dev' + os.path.splitext(to_path)[1])
-            dev_file = open(dev_path, 'a', encoding='utf-8')
+    to_file = open(to_path, 'w', encoding='utf-8')
+    lines = from_file.readlines()
+    length = len(lines)
+    data_name = os.path.split(to_path)[1]
+    print('begin clean dataset {}...'.format(data_name))
+    if build_dev:
+        dev_path = os.path.join(
+            os.path.split(to_path)[0], 'dev' + os.path.splitext(to_path)[1])
+        dev_file = open(dev_path, 'w', encoding='utf-8')
+        print('meanwhile generate clear dev data from {}...'.format(data_name))
+    for idx, line in enumerate(lines):
         row = line.split('\t')
         label_block = False
-
         if build_dev and idx % (1 // dev_ratio) == 0:
             for string in row[4].split():
                 m = re.match(r'^(</|<)([^<>]+)>$', string)
@@ -38,11 +43,12 @@ def write_clear_data(from_path, build_dev=False, dev_ratio=0.1):
                     label = m.group(2).lower()
                 elif label_block:
                     # to_file.write(string + ' ' + label + '\n')
-                    dev_file.write(string + ' ' + label + '\n')
+                    dev_file.write(string + '\t' + label + '\n')
                 else:
                     # to_file.write(string + ' ' + DEFAULT + '\n')
-                    dev_file.write(string + ' ' + DEFAULT + '\n')
-            dev_file.write('\n')
+                    dev_file.write(string + '\t' + DEFAULT + '\n')
+            if idx != length - 1:
+                dev_file.write('\n')
         else:
             for string in row[4].split():
                 m = re.match(r'^(</|<)([^<>]+)>$', string)
@@ -50,17 +56,20 @@ def write_clear_data(from_path, build_dev=False, dev_ratio=0.1):
                     label_block = not label_block
                     label = m.group(2).lower()
                 elif label_block:
-                    to_file.write(string + ' ' + label + '\n')
+                    to_file.write(string + '\t' + label + '\n')
                 else:
-                    to_file.write(string + ' ' + DEFAULT + '\n')
-        to_file.write('\n')
+                    to_file.write(string + '\t' + DEFAULT + '\n')
+            if idx != length - 1:
+                to_file.write('\n')
     to_file.close()
     from_file.close()
+    print("clean -done.")
     if build_dev:
         dev_file.close()
         return to_path, dev_path
     else:
         return to_path, None
+
 
 # special error message
 class MyIOError(Exception):
@@ -452,3 +461,6 @@ def get_chunks(seq, tags):
         chunks.append(chunk)
 
     return chunks
+
+def clear_data_path(from_path):
+    return os.path.splitext(from_path)[0]+".txt"
